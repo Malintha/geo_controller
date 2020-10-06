@@ -1,0 +1,71 @@
+<launch>
+    <arg name="uri" default="radio://0/80/2M" />
+    <arg name="frame" default="vicon/crazyflie_frame/crazyflie_frame"/>
+    <arg name="joy_dev" default="/dev/input/js0" />
+
+    <include file="$(find crazyflie_driver)/launch/crazyflie_server.launch">
+    </include>
+
+    <group ns="crazyflie">
+        <node pkg="crazyflie_driver" type="crazyflie_add" name="crazyflie_add" output="screen">
+            <param name="uri" value="$(arg uri)" />
+            <param name="tf_prefix" value="crazyflie" />
+
+            <rosparam>
+                genericLogTopics: ["log1", "log2"]
+                genericLogTopicFrequencies: [25, 25]
+                genericLogTopic_log1_Variables: ["leedebug.debug_0","leedebug.debug_1","leedebug.debug_2", "leedebug.debug_3","leedebug.debug_4","leedebug.debug_5"]
+                genericLogTopic_log2_Variables: ["leedebug.debug_6","leedebug.debug_7","leedebug.debug_8"]
+
+            </rosparam>
+        </node>
+
+        <node name="joy" pkg="joy" type="joy_node" output="screen">
+            <param name="dev" value="$(arg joy_dev)" />
+        </node>
+
+        <node name="joystick_controller" pkg="crazyflie_demo" type="controller.py" output="screen">
+            <param name="use_crazyflie_controller" value="True" />
+        </node>
+
+        <include file="$(find geo_controller)/launch/geo_controller.launch">
+            <arg name="frame" value="$(arg frame)" />
+        </include>
+
+        <node pkg="tf" type="static_transform_publisher" name="baselink_broadcaster" args="0 0 0 0 0 0 1 $(arg frame) /crazyflie/base_link 100" />
+    </group>
+
+    <include file="$(find vicon_bridge)/launch/vicon.launch"/>
+    <param name="robot_description" command="$(find xacro)/xacro.py $(find crazyflie_description)/urdf/crazyflie.urdf.xacro" />
+    <!--<node name="rviz" pkg="rviz" type="rviz" args="-d $(find crazyflie_demo)/launch/crazyflie_pos.rviz" required="true" />-->
+
+    <!--Running debug plots-->
+
+    <!--<node pkg="rqt_plot" type="rqt_plot" name="rqt_plot1"-->
+          <!--args="/crazyflie/geo_debug_f1 /crazyflie/geo_debug_f2 /crazyflie/geo_debug_f3 /crazyflie/geo_debug_f4"/>-->
+
+    <!--<node pkg="rqt_plot" type="rqt_plot" name="rqt_plot2"-->
+          <!--args="/crazyflie/geo_debug_ratio_m1 /crazyflie/geo_debug_ratio_m2 /crazyflie/geo_debug_ratio_m3 /crazyflie/geo_debug_ratio_m4"/>-->
+
+    <!--<node pkg="rqt_plot" type="rqt_plot" name="rqt_plot3" args="/crazyflie/geo_debug_totalthrust"/>-->
+
+    <!--<node pkg="rqt_plot" type="rqt_plot" name="rqt_plot4" args="/crazyflie/geo_debug_er_1 /crazyflie/geo_debug_er_2 /crazyflie/geo_debug_er_3"/>-->
+
+    <!--<node pkg="rqt_plot" type="rqt_plot" name="rqt_plot5" args="/crazyflie/geo_debug_roll /crazyflie/geo_debug_pitch /crazyflie/geo_debug_yaw"/>-->
+
+    <!--<node pkg="rqt_plot" type="rqt_plot" name="rqt_plot6"-->
+          <!--args="/crazyflie/geo_debug_ex_1 /crazyflie/geo_debug_ex_2 /crazyflie/geo_debug_ex_3"/>-->
+
+    <!--<node pkg="rqt_plot" type="rqt_plot" name="rqt_plot7"-->
+          <!--args="/crazyflie/geo_debug_x_3"/>-->
+
+    <!--<node pkg="rqt_plot" type="rqt_plot" name="rqt_plot8" args="/crazyflie/geo_debug_eOmega_1 /crazyflie/geo_debug_eOmega_2 /crazyflie/geo_debug_eOmega_3"/>-->
+
+    <!--<node pkg="rqt_plot" type="rqt_plot" name="rqt_plot9" args="/crazyflie/geo_debug_Omega_1 /crazyflie/geo_debug_Omega_2 /crazyflie/geo_debug_Omega_3"/>-->
+
+    <!--<node pkg="rqt_plot" type="rqt_plot" name="rqt_plot10" args="/crazyflie/geo_debug_ev_1 /crazyflie/geo_debug_ev_2 /crazyflie/geo_debug_ev_3"/>-->
+
+    <!--<node pkg="rqt_plot" type="rqt_plot" name="rqt_plot11" args="/crazyflie/geo_debug_m1 /crazyflie/geo_debug_m2 /crazyflie/geo_debug_m3"/>-->
+
+
+</launch>
